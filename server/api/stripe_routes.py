@@ -6,7 +6,7 @@ from app import app
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
-const host = os.getenv("BASE_URL")
+host = os.getenv("BASE_URL")
 
 
 @app.post("/create-checkout-session")
