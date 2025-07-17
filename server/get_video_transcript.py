@@ -5,6 +5,10 @@ import os
 import re  # Added for duration parsing
 
 API_KEY = os.getenv("YOUTUBE_API_KEY")
+proxies = {
+    'http': os.getenv("PROXY"),
+    'https': os.getenv("PROXY"),
+}
 
 CATEGORY_MAP = {
     "1": "Film & Animation",
@@ -117,7 +121,10 @@ def get_metadata(video_id: str) -> Dict[str, Any]:
 def get_transcripts(video_id: str) -> List[Dict[str, Any]]:
     tracks = []
     try:
-        transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+        transcripts = YouTubeTranscriptApi.list_transcripts(
+            video_id,
+            proxies=proxies
+        )
         for transcript in transcripts:
             lang_name = transcript.language
             try:
