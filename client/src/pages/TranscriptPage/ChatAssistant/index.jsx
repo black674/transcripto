@@ -20,7 +20,7 @@ export default function ChatAssistant() {
 
   const baseUrl = import.meta.env.VITE_APP_BASE_URL.replace(/^https?:\/\//, "");
 
-  const socketUrl = `ws://${baseUrl}/ai-chat`;
+  const socketUrl = `wss://${baseUrl}/ai-chat`;
   const { sendJsonMessage, lastMessage } = useWebSocket(socketUrl);
 
   const updateLastMessage = (message, data) => {
