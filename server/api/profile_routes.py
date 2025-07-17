@@ -21,6 +21,7 @@ async def get_profile(user_id: str = Depends(get_current_user)):
 
 @app.get("/account")
 async def get_account(user_id: str = Depends(get_current_user)):
+    print(user_id)
     account = get_account_details(user_id)
     
     if not account:
