@@ -61,7 +61,9 @@ const LoginModal = () => {
       }
 
       const data = await response.json();
-      await login(data.session);
+      setTimeout(() => {
+        login(data.session);
+      }, 2000);
       toast.success("Success", {
         description: "Logged in successfully",
       });
