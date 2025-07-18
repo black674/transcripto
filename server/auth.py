@@ -76,27 +76,47 @@ def get_account_details(user_id):
         print("=== Get Account Details Debug ===")
         print(f"1. Starting request for user_id: {user_id}")
         
-        # Log the current session state
+        # Try to get current session user instead of admin API
         try:
+            print("2. Attempting to get user from session...")
             session = supabase.auth.get_session()
-            print("2. Current session exists:", bool(session))
+            if not session:
+                print("3. No session found")
+                return None
+                
+            user = session.user
+            print("4. Successfully got user from session")
+            
+            # Verify the user ID matches
+            if user.id != user_id:
+                print("5. User ID mismatch")
+                return None
+                
+            return {
+                "user": user,
+                "email_verified": user.email_confirmed_at is not None
+            }
+            
         except Exception as session_error:
-            print("2. Error getting session:", str(session_error))
-        
-        # Try to get user details
-        print("3. Attempting to get user details...")
-        user = supabase.auth.admin.get_user_by_id(user_id)
-        print("4. User details retrieved successfully")
-        
-        if not user or not user.user:
-            print("5. No user data found")
-            return None
-        
-        print("6. Successfully got user details")
-        return {
-            "user": user.user,
-            "email_verified": user.user.email_confirmed_at is not None
-        }
+            print(f"Session error: {str(session_error)}")
+            
+            # Fallback to try getting user metadata from the database
+            try:
+                print("6. Attempting fallback to database query...")
+                response = supabase.table("users").select("*").eq("id", user_id).single().execute()
+                if response.data:
+                    print("7. Found user in database")
+                    return {
+                        "user": response.data,
+                        "email_verified": True  # Assuming if in DB, email is verified
+                    }
+                else:
+                    print("7. User not found in database")
+                    return None
+            except Exception as db_error:
+                print(f"Database error: {str(db_error)}")
+                return None
+                
     except Exception as e:
         print("=== Error Details ===")
         print(f"Error type: {type(e).__name__}")
