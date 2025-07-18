@@ -73,17 +73,38 @@ def is_email_verified(user_id):
 def get_account_details(user_id):
     """Get user account details from Supabase Auth"""
     try:
+        print("=== Get Account Details Debug ===")
+        print(f"1. Starting request for user_id: {user_id}")
+        
+        # Log the current session state
+        try:
+            session = supabase.auth.get_session()
+            print("2. Current session exists:", bool(session))
+        except Exception as session_error:
+            print("2. Error getting session:", str(session_error))
+        
+        # Try to get user details
+        print("3. Attempting to get user details...")
         user = supabase.auth.admin.get_user_by_id(user_id)
+        print("4. User details retrieved successfully")
         
         if not user or not user.user:
+            print("5. No user data found")
             return None
         
+        print("6. Successfully got user details")
         return {
             "user": user.user,
             "email_verified": user.user.email_confirmed_at is not None
         }
     except Exception as e:
-        print(f"Error getting account details: {str(e)}")
+        print("=== Error Details ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        import traceback
+        print("Full traceback:")
+        print(traceback.format_exc())
+        print("=====================")
         return None
 
 def refresh_token(refresh_token):
