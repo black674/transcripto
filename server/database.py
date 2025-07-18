@@ -144,6 +144,12 @@ def get_user_transcripts(user_id, limit, offset):
         .order('created_at', desc=True) \
         .range(offset, offset + limit) \
         .execute()
+    
+    # Remove metadata from each record's data
+    for record in response.data:
+        if 'data' in record and 'metadata' in record['data']:
+            del record['data']['metadata']
+    
     return response.data
 
 def get_transcript_by_video_id(user_id, video_id):
