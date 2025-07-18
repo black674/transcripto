@@ -29,7 +29,7 @@ export default function ContactForm() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
+    reset,
   } = useForm({
     resolver: zodResolver(schema),
   });
@@ -73,10 +73,7 @@ export default function ContactForm() {
       });
 
       console.log(data);
-      setValue("name", "");
-      setValue("email", "");
-      setValue("subject", "");
-      setValue("message", "");
+      reset();
     } catch (error) {
       console.log(error);
       setFormStatus({

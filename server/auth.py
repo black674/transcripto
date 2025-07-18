@@ -1,6 +1,8 @@
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from typing import Optional, Dict, Any
+import logging
 
 load_dotenv()
 
@@ -8,6 +10,8 @@ supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
 supabase_jwt_secret = os.getenv("SUPABASE_JWT_SECRET")
 supabase: Client = create_client(supabase_url, supabase_key)
+
+logger = logging.getLogger(__name__)
 
 def signup_user(email, password):
     """Sign up a new user with email and password"""
@@ -70,61 +74,28 @@ def is_email_verified(user_id):
         print(f"Error checking email verification: {e}")
         return False
 
-def get_account_details(user_id):
-    """Get user account details from Supabase Auth"""
+def get_account_details(user_id: str) -> Optional[Dict[str, Any]]:
     try:
-        print("=== Get Account Details Debug ===")
-        print(f"1. Starting request for user_id: {user_id}")
-        
-        # Try to get current session user instead of admin API
-        try:
-            print("2. Attempting to get user from session...")
-            session = supabase.auth.get_session()
-            if not session:
-                print("3. No session found")
-                return None
-                
-            user = session.user
-            print("4. Successfully got user from session")
-            
-            # Verify the user ID matches
-            if user.id != user_id:
-                print("5. User ID mismatch")
-                return None
-                
+        # Try to get user from current session
+        session = supabase.auth.get_session()
+        if session and session.user:
             return {
-                "user": user,
-                "email_verified": user.email_confirmed_at is not None
+                "user": session.user,
+                "email_verified": session.user.email_confirmed_at is not None
+            }
+
+        # Fallback to database query
+        response = supabase.table("users").select("*").eq("id", user_id).single().execute()
+        if response.data:
+            return {
+                "user": response.data,
+                "email_verified": response.data.get("email_confirmed_at") is not None
             }
             
-        except Exception as session_error:
-            print(f"Session error: {str(session_error)}")
-            
-            # Fallback to try getting user metadata from the database
-            try:
-                print("6. Attempting fallback to database query...")
-                response = supabase.table("users").select("*").eq("id", user_id).single().execute()
-                if response.data:
-                    print("7. Found user in database")
-                    return {
-                        "user": response.data,
-                        "email_verified": True  # Assuming if in DB, email is verified
-                    }
-                else:
-                    print("7. User not found in database")
-                    return None
-            except Exception as db_error:
-                print(f"Database error: {str(db_error)}")
-                return None
-                
+        return None
+
     except Exception as e:
-        print("=== Error Details ===")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error message: {str(e)}")
-        import traceback
-        print("Full traceback:")
-        print(traceback.format_exc())
-        print("=====================")
+        logger.error(f"Error getting account details: {str(e)}")
         return None
 
 def refresh_token(refresh_token):

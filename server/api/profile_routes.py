@@ -21,17 +21,10 @@ async def get_profile(user_id: str = Depends(get_current_user)):
 
 @app.get("/account")
 async def get_account(user_id: str = Depends(get_current_user)):
-    print("=== Account Endpoint Debug ===")
-    print(f"1. Endpoint called with user_id: {user_id}")
-    
     try:
-        print("2. Calling get_account_details...")
         account = get_account_details(user_id)
         
-        print(f"3. get_account_details returned: {bool(account)}")
-        
         if not account:
-            print("4. No account found - raising 404")
             raise HTTPException(
                 status_code=404, 
                 detail={
@@ -40,15 +33,11 @@ async def get_account(user_id: str = Depends(get_current_user)):
                 }
             )
         
-        print("5. Successfully returning account details")
         return account
         
     except HTTPException as he:
         raise he
     except Exception as e:
-        print("=== Unexpected Error ===")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error message: {str(e)}")
         raise HTTPException(
             status_code=500, 
             detail={
