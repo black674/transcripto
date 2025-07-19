@@ -49,7 +49,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="container mx-auto min-h-screen flex flex-col justify-center items-center">
-          <ErrorCard message={this.state.error} />
+          <ErrorCard className="!max-w-2xl" message={this.state.error} />
         </div>
       );
     }

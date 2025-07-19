@@ -76,20 +76,20 @@ def is_email_verified(user_id):
 
 def get_account_details(user_id: str) -> Optional[Dict[str, Any]]:
     try:
-        # Try to get user from current session
+        user = supabase.auth.admin.get_user_by_id(user_id)
+        
+        if user and user.user:
+            return {
+                "user": user.user,
+                "email_verified": user.user.email_confirmed_at is not None
+            }
+    
+        print("user_id not found trying session method...", user_id)
         session = supabase.auth.get_session()
         if session and session.user:
             return {
                 "user": session.user,
                 "email_verified": session.user.email_confirmed_at is not None
-            }
-
-        # Fallback to database query
-        response = supabase.table("users").select("*").eq("id", user_id).single().execute()
-        if response.data:
-            return {
-                "user": response.data,
-                "email_verified": response.data.get("email_confirmed_at") is not None
             }
             
         return None
