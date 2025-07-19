@@ -75,6 +75,7 @@ def is_email_verified(user_id):
         return False
 
 def get_account_details(user_id: str) -> Optional[Dict[str, Any]]:
+    print("user_id:", user_id)
     try:
         user = supabase.auth.admin.get_user_by_id(user_id)
         
